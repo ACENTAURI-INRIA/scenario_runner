@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<scenarios>
+    <scenario name="Context0_3" type="Context0_3" town="Town04">
+        <ego_vehicle x="228" y="-246" z="1" yaw="0" model="vehicle.lincoln.mkz_2017" />
+		<weather cloudiness="0" precipitation="0" precipitation_deposits="0" wind_intensity="0" sun_azimuth_angle="0" sun_altitude_angle="20" />
+    </scenario>
+</scenarios>
