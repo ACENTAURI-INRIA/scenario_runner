@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<scenarios>
+   <!-- Free Ride -->
+    <scenario name="Context1FreeRide" type="Context1FreeRide" town="Town02">
+       <ego_vehicle x="67.10" y="187.40" z="1.22" yaw="178" model="vehicle.lincoln.mkz_2017"/>
+    </scenario>
+
+   <!--  -->
+    <scenario name="Context1" type="Context1" town="Town02">
+         <ego_vehicle x="90" y="187.4" z="1.22" yaw="178" model="vehicle.lincoln.mkz_2017"/>
+         <weather cloudiness="0" precipitation="0" precipitation_deposits="0" wind_intensity="0" sun_azimuth_angle="0" sun_altitude_angle="75"/>
+       <!--  <other_actor x="52" y="182" z="0.5" yaw="90"  model="vehicle.diamondback.century"/> -->
+         <!-- <other_actor x="52" y="197" z="0.5" yaw="270" model="vehicle.diamondback.century"/> -->
+         <other_actor x="40" y="182" z="0.5" yaw="45"  model="vehicle.diamondback.century"/>
+         <other_actor x="60" y="182" z="0.5" yaw="135" model="vehicle.diamondback.century"/>
+    </scenario>
+
+</scenarios>
