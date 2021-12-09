@@ -56,15 +56,11 @@ class Context1(BasicScenario):
         self._other_actor_target_velocity = 6
         self._other_actors_max_brake = 1.0
         self._time_to_reach = 10
-        self._walker_yaw = 0
         self._num_lane_changes = 1
         self.transforms = []
+        self.other_actor = None # []
         self.timeout = timeout
         self._trigger_location = config.trigger_points[0].location
-        # Total Number of attempts to relocate a vehicle before spawning
-        self._number_of_attempts = 20
-        # Number of attempts made so far
-        self._spawn_attempted = 0
 
         self._ego_route = CarlaDataProvider.get_ego_vehicle_route()
 
@@ -88,7 +84,8 @@ class Context1(BasicScenario):
 
             vehicle = CarlaDataProvider.request_new_actor(other_actor.model, transform)
 
-            vehicle.set_simulate_physics(enabled=False)
+            vehicle.set_simulate_physics(enabled=True)
+
             self.other_actors.append(vehicle)
             self.transforms.append(transform)
 
@@ -135,7 +132,6 @@ class Context1(BasicScenario):
         """ 
 
         root = py_trees.composites.Parallel(policy=py_trees.common.ParallelPolicy.SUCCESS_ON_ALL, name="ObjectCrossing")
-
 
         # building tree
         ego_pass_machine = DriveDistance(self.ego_vehicles[0], 10, name="ego vehicle passed props")
