@@ -58,7 +58,7 @@ class Context1(BasicScenario):
         self._time_to_reach = 10
         self._num_lane_changes = 1
         self.transforms = []
-        self.other_actor = None # []
+        self.other_actor = []
         self.timeout = timeout
         self._trigger_location = config.trigger_points[0].location
 
