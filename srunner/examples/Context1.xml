@@ -12,7 +12,7 @@
          <other_actor x="52.5" y="182" z="0.5" yaw="90"  model="vehicle.diamondback.century" category="bicycle"/>
          <!-- <other_actor x="50.5" y="197" z="0.5" yaw="270" model="vehicle.diamondback.century" category="bicycle"/> -->
          <!-- <other_actor x="40" y="182" z="0.5" yaw="45"  model="vehicle.diamondback.century" category="bicycle"/> -->
-         <other_actor x="60" y="182" z="0.5" yaw="135" model="vehicle.diamondback.century" category="bicycle"/>
+         <!-- <other_actor x="60" y="182" z="0.5" yaw="135" model="vehicle.diamondback.century" category="bicycle"/> -->
     </scenario>
 <!-- 
    <scenario name="Context1_1" type="Context1" town="Town02">
