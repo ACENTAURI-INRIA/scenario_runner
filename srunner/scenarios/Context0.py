@@ -10,7 +10,8 @@ from srunner.scenariomanager.scenarioatomics.atomic_behaviors import (ActorTrans
                                                                       AccelerateToVelocity,
                                                                       HandBrakeVehicle,
                                                                       KeepVelocity,
-                                                                      StopVehicle)
+                                                                      StopVehicle,
+                                                                      WaypointFollower)
 from srunner.scenariomanager.scenarioatomics.atomic_criteria import CollisionTest
 from srunner.scenariomanager.scenarioatomics.atomic_trigger_conditions import (InTriggerDistanceToLocationAlongRoute,
                                                                                InTimeToArrivalToVehicle,
@@ -43,6 +44,15 @@ class Context0(BasicScenario):
         self.timeout = timeout
         self._trigger_location = config.trigger_points[0].location
         self._ego_route = CarlaDataProvider.get_ego_vehicle_route()
+        
+        waypointArray = {"Context0_1":[[249,-241,0.6],[249,-300,0.6]],
+                         "Context0_2":[[249,-241,0.6],[249,-300,0.6]],
+                         "Context0_3":[[262,-241,0.6],[249,-251,0.6], [249,-300,0.6]]}
+        waypoints = waypointArray[config.name]
+        self.waypoint = []
+        for wp in waypoints:
+            self.waypoint.append(carla.Location(wp[0], wp[1], wp[2]))
+        
         super(Context0, self).__init__("Context0", ego_vehicles, config, world, debug_mode, criteria_enable=criteria_enable)
 
     def _initialize_actors(self, config):
@@ -75,15 +85,17 @@ class Context0(BasicScenario):
         actor_start_cross_lane = AccelerateToVelocity(other_actor, 1.0, self._other_actors_target_velocity, name="{} accelarting".format(other_actor.id))
         actor_cross_lane = DriveDistance(other_actor, lane_width * 3, name="{} drive distance for lane crossing".format(other_actor.id))
         actor_stop_crossed_lane = StopVehicle(other_actor, self._other_actors_max_brake, name="{} stop".format(other_actor.id))
-        #actor_remove = ActorDestroy(other_actor, name="Destroying Actor: {}".format(other_actor.id))
+        actor_follow_waypoint = WaypointFollower(other_actor, self._other_actors_target_velocity, self.waypoint, None, avoid_collision=True)
+        actor_remove = ActorDestroy(other_actor, name="Destroying Actor: {}".format(other_actor.id))
 
         # adding behaviout nodes to a behaviour sequence
         scenario_sequence.add_child(ActorTransformSetter(other_actor, transform, name='TransformSetterTS3walker'))
         scenario_sequence.add_child(HandBrakeVehicle(other_actor, True))
         scenario_sequence.add_child(start_condition)
         scenario_sequence.add_child(HandBrakeVehicle(other_actor, False))
-        scenario_sequence.add_child(actor_start_cross_lane)
-        scenario_sequence.add_child(actor_cross_lane)
+        #scenario_sequence.add_child(actor_start_cross_lane)
+        #scenario_sequence.add_child(actor_cross_lane)
+        scenario_sequence.add_child(actor_follow_waypoint)
         scenario_sequence.add_child(actor_stop_crossed_lane)
         #scenario_sequence.add_child(actor_remove)
 
