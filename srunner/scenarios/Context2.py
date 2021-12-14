@@ -20,6 +20,7 @@ from srunner.scenariomanager.carla_data_provider import CarlaDataProvider
 from srunner.scenariomanager.scenarioatomics.atomic_behaviors import (ActorTransformSetter,
                                                                       ActorDestroy,
                                                                       AccelerateToVelocity,
+                                                                      BasicAgentBehavior,
                                                                       HandBrakeVehicle,
                                                                       KeepVelocity,
                                                                       Idle,
@@ -130,6 +131,8 @@ class Context2(BasicScenario):
         # creating behaviour nodes
         actor_accelerate = AccelerateToVelocity(other_actor, 1.0, self._other_actor_target_velocity, name="{} accelarting".format(other_actor.id))
         actor_crossed_lane = DriveDistance(other_actor, 8, name="{} drive distance for direction changing".format(other_actor.id))
+        # actor_goto_destination = BasicAgentBehavior(other_actor, carla.Location(70, 45, 0))
+
 
         # adding behaviout nodes to a behaviour sequence
         scenario_sequence.add_child(ActorTransformSetter(other_actor, transform, name='TransformSetterTS3walker'))
@@ -138,9 +141,10 @@ class Context2(BasicScenario):
         scenario_sequence.add_child(HandBrakeVehicle(other_actor, False))
         scenario_sequence.add_child(actor_accelerate)
         scenario_sequence.add_child(actor_crossed_lane)
-        scenario_sequence.add_child(HandBrakeVehicle(other_actor, True))
+        # scenario_sequence.add_child(HandBrakeVehicle(other_actor, True))
 
-        scenario_sequence.add_child( StopVehicle(other_actor, self._other_actors_max_brake, name="{} stop".format(other_actor.id)) )
+        scenario_sequence.add_child(StopVehicle(other_actor, self._other_actors_max_brake, name="{} stop".format(other_actor.id)))
+        # scenario_sequence.add_child(actor_goto_destination)
         scenario_sequence.add_child(Idle())
 
         return scenario_sequence

@@ -7,7 +7,7 @@
 
     <scenario name="Context2" type="Context2" town="Town03">
          <ego_vehicle x="114" y="62.5" z="1.22" yaw="0" model="vehicle.lincoln.mkz_2017"/>
-         <weather cloudiness="0" precipitation="0" precipitation_deposits="0" wind_intensity="0" sun_azimuth_angle="0" sun_altitude_angle="75"/>
+         <weather cloudiness="0" precipitation="0" precipitation_deposits="0" wind_intensity="0" sun_azimuth_angle="0" sun_altitude_angle="20"/>
          <other_actor x="152" y="70" z="0.2" yaw="270"  model="vehicle.diamondback.century" category="bicycle"/>
     </scenario>
 
