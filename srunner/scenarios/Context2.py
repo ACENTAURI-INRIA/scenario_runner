@@ -22,6 +22,7 @@ from srunner.scenariomanager.scenarioatomics.atomic_behaviors import (ActorTrans
                                                                       AccelerateToVelocity,
                                                                       BasicAgentBehavior,
                                                                       HandBrakeVehicle,
+                                                                      WaypointFollower,
                                                                       KeepVelocity,
                                                                       Idle,
                                                                       StopVehicle)
@@ -37,7 +38,7 @@ class Context2(BasicScenario):
     """
     """
     def __init__(self, world, ego_vehicles, config, randomize=False,
-                 debug_mode=False, criteria_enable=True, timeout=60):
+                 debug_mode=False, criteria_enable=True, timeout=600):
         """
         Setup all relevant parameters and create scenario
         """
@@ -53,6 +54,7 @@ class Context2(BasicScenario):
         self._num_lane_changes = 1
         self.transforms = []
         self.other_actor = []
+        self.other_actors_plan = []
         self.timeout = timeout
         self._trigger_location = config.trigger_points[0].location
 
@@ -106,12 +108,27 @@ class Context2(BasicScenario):
             vehicle.set_simulate_physics(enabled=True)
 
             self.other_actors.append(vehicle)
+
+
+            plan = [
+                location,  
+                carla.Location(location.x, location.y - 21, location.z), # crossing the street
+                carla.Location(location.x - 30, location.y - 21, 0), #  going to the house (middle point to make the path smooth)
+                carla.Location(location.x - 37, location.y - 20.5, 0), # going the the house (endpoint)
+                carla.Location(location.x - 37, location.y - 25, 0), # going to the garage (midpoint)
+                carla.Location(location.x - 40, location.y - 29, 0) # going to the garage (endpoint)
+            ]
+
+            for p in plan: print(p.x, p.y, p.z)
+
             self.transforms.append(transform)
+
+            self.other_actors_plan.append(plan)
 
             blocker = self._spawn_blocker(location)
 
 
-    def _create_behavior_branch(self, node, other_actor, transform):
+    def _create_behavior_branch(self, node, other_actor, transform, plan = []):
         dist_to_trigger = 50 + self._num_lane_changes
 
         scenario_sequence = py_trees.composites.Sequence()
@@ -131,20 +148,23 @@ class Context2(BasicScenario):
         # creating behaviour nodes
         actor_accelerate = AccelerateToVelocity(other_actor, 1.0, self._other_actor_target_velocity, name="{} accelarting".format(other_actor.id))
         actor_crossed_lane = DriveDistance(other_actor, 8, name="{} drive distance for direction changing".format(other_actor.id))
-        # actor_goto_destination = BasicAgentBehavior(other_actor, carla.Location(70, 45, 0))
-
+        
 
         # adding behaviout nodes to a behaviour sequence
         scenario_sequence.add_child(ActorTransformSetter(other_actor, transform, name='TransformSetterTS3walker'))
         scenario_sequence.add_child(HandBrakeVehicle(other_actor, True))
         scenario_sequence.add_child(start_condition)
         scenario_sequence.add_child(HandBrakeVehicle(other_actor, False))
-        scenario_sequence.add_child(actor_accelerate)
-        scenario_sequence.add_child(actor_crossed_lane)
-        # scenario_sequence.add_child(HandBrakeVehicle(other_actor, True))
+
+        if len(plan) > 0:
+            actor_route = WaypointFollower(other_actor, 3, plan, avoid_collision = False)
+            scenario_sequence.add_child(actor_route)
+        else:
+            scenario_sequence.add_child(actor_accelerate)
+            scenario_sequence.add_child(actor_crossed_lane)
+            scenario_sequence.add_child(HandBrakeVehicle(other_actor, True))            
 
         scenario_sequence.add_child(StopVehicle(other_actor, self._other_actors_max_brake, name="{} stop".format(other_actor.id)))
-        # scenario_sequence.add_child(actor_goto_destination)
         scenario_sequence.add_child(Idle())
 
         return scenario_sequence
@@ -159,13 +179,20 @@ class Context2(BasicScenario):
         ego_pass_machine = DriveDistance(self.ego_vehicles[0], 10, name="ego vehicle passed props")
         end_condition = DriveDistance(self.ego_vehicles[0], self._ego_vehicle_distance_driven, name="End condition ego drive distance")
 
-        for other_actor, transform in zip(self.other_actors, self.transforms):
-            branch = self._create_behavior_branch(root, other_actor, transform)
+        for i in range(len(self.other_actors)):
+            other_actor = self.other_actors[i]
+            transform = self.transforms[i]
+            other_actor_plan = self.other_actors_plan[i]
+            branch = self._create_behavior_branch(root, other_actor, transform, other_actor_plan)
             root.add_child(branch)
 
 
-        root.add_child(ego_pass_machine)
-        root.add_child(end_condition)
+        stop_after_scenario = False
+        if stop_after_scenario:
+            root.add_child(ego_pass_machine)
+            root.add_child(end_condition)
+        else:
+            root.add_child(Idle())
 
         return root
 
