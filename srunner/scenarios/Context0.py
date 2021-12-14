@@ -1,16 +1,4 @@
-#!/usr/bin/env python
-# This work is licensed under the terms of the MIT license.
-# For a copy, see <https://opensource.org/licenses/MIT>.
-
-"""
-Object crash without prior vehicle action scenario:
-The scenario realizes the user controlled ego vehicle
-moving along the road and encountering a cyclist ahead.
-"""
-
 from __future__ import print_function
-
-from enum import Enum
 
 import math
 import py_trees
@@ -22,7 +10,6 @@ from srunner.scenariomanager.scenarioatomics.atomic_behaviors import (ActorTrans
                                                                       AccelerateToVelocity,
                                                                       HandBrakeVehicle,
                                                                       KeepVelocity,
-                                                                      Idle,
                                                                       StopVehicle)
 from srunner.scenariomanager.scenarioatomics.atomic_criteria import CollisionTest
 from srunner.scenariomanager.scenarioatomics.atomic_trigger_conditions import (InTriggerDistanceToLocationAlongRoute,
@@ -32,13 +19,8 @@ from srunner.scenariomanager.timer import TimeOut
 from srunner.scenarios.basic_scenario import BasicScenario
 from srunner.tools.scenario_helper import get_location_in_distance_from_wp
 
-class CrossingType(Enum):
-    LEFT2RIGHT = 1
-    RIGHT2LEFT = 2
-    DIAGONALBOT2TOP = 3
-    DIAGONALTOP2BOT = 4
 
-class Context1(BasicScenario):
+class Context0(BasicScenario):
     """
     """
 
@@ -52,18 +34,16 @@ class Context1(BasicScenario):
         # ego vehicle parameters
         self._ego_vehicle_distance_driven = 30
         # other vehicle parameters
-        self._other_actors_target_velocity = 6
+        self._other_actors_target_velocity = 3
         self._other_actors_max_brake = 1.0
-        self._time_to_reach = 50
+        self._time_to_reach = 10
         self._num_lane_changes = 1
         self.transforms = []
         self.other_actor = []
         self.timeout = timeout
         self._trigger_location = config.trigger_points[0].location
-
         self._ego_route = CarlaDataProvider.get_ego_vehicle_route()
-
-        super(Context1, self).__init__("Context1", ego_vehicles, config, world, debug_mode, criteria_enable=criteria_enable)
+        super(Context0, self).__init__("Context0", ego_vehicles, config, world, debug_mode, criteria_enable=criteria_enable)
 
     def _initialize_actors(self, config):
         """
@@ -74,12 +54,10 @@ class Context1(BasicScenario):
             carla.Location(other_actor.transform.location.x,
                            other_actor.transform.location.y,
                            other_actor.transform.location.z),
-            other_actor.transform.rotation)
+                           other_actor.transform.rotation)
 
-            vehicle = CarlaDataProvider.request_new_actor(other_actor.model, transform)
-
+            vehicle = CarlaDataProvider.request_new_actor('walker.*', transform)
             vehicle.set_simulate_physics(enabled=True)
-
             self.other_actors.append(vehicle)
             self.transforms.append(transform)
 
@@ -91,20 +69,11 @@ class Context1(BasicScenario):
         scenario_sequence = py_trees.composites.Sequence()
 
         # nodes
-        if self._ego_route is not None:
-            start_condition = InTriggerDistanceToLocationAlongRoute(self.ego_vehicles[0],
-                                                                    self._ego_route,
-                                                                    self.transform.location,
-                                                                    dist_to_trigger)
-        else:
-            start_condition = InTimeToArrivalToVehicle(self.ego_vehicles[0],
-                                                       other_actor,
-                                                       self._time_to_reach)
-
+        start_condition = InTimeToArrivalToVehicle(self.ego_vehicles[0], other_actor, self._time_to_reach)
 
         # creating behaviour nodes
         actor_start_cross_lane = AccelerateToVelocity(other_actor, 1.0, self._other_actors_target_velocity, name="{} accelarting".format(other_actor.id))
-        actor_cross_lane = DriveDistance(other_actor, lane_width * 1.5, name="{} drive distance for lane crossing".format(other_actor.id))
+        actor_cross_lane = DriveDistance(other_actor, lane_width * 3, name="{} drive distance for lane crossing".format(other_actor.id))
         actor_stop_crossed_lane = StopVehicle(other_actor, self._other_actors_max_brake, name="{} stop".format(other_actor.id))
         #actor_remove = ActorDestroy(other_actor, name="Destroying Actor: {}".format(other_actor.id))
 
@@ -123,8 +92,7 @@ class Context1(BasicScenario):
     def _create_behavior(self):
         """
         """ 
-
-        root = py_trees.composites.Parallel(policy=py_trees.common.ParallelPolicy.SUCCESS_ON_ALL, name="ObjectCrossing")
+        root = py_trees.composites.Parallel(policy=py_trees.common.ParallelPolicy.SUCCESS_ON_ALL, name="Context0")
 
         for other_actor, transform in zip(self.other_actors, self.transforms):
             branch = self._create_behavior_branch(root, other_actor, transform)
