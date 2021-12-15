@@ -46,7 +46,7 @@ class Context0(BasicScenario):
         self._ego_route = CarlaDataProvider.get_ego_vehicle_route()
         
         waypointArray = {"Context0_1":[[249,-241,0.6],[249,-300,0.6]],
-                         "Context0_2":[[249,-241,0.6],[249,-300,0.6]],
+                         "Context0_2":[[249,-251,0.6],[249,-300,0.6]],
                          "Context0_3":[[262,-241,0.6],[249,-251,0.6], [249,-300,0.6]]}
         waypoints = waypointArray[config.name]
         self.waypoint = []

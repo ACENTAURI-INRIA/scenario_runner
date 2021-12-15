@@ -9,7 +9,7 @@
 
     <scenario name="Context0_2" type="Context0" town="Town04">
 		<ego_vehicle x="220" y="-246" z="1" yaw="0" model="vehicle.lincoln.mkz_2017" />
-        <other_actor x="249" y="-238" z="0.6" yaw="270"  model="walker.*" category="walker"/>
+        <other_actor x="251" y="-238" z="0.6" yaw="270"  model="walker.*" category="walker"/>
         <other_actor x="240" y="-240" z="0.6" yaw="0" model="walker.*" category="walker"/>
 		<!-- <other_actor x="238" y="-243" z="0.6" yaw="300" model="walker.*" category="walker"/> -->
 		<weather cloudiness="0" precipitation="0" precipitation_deposits="0" wind_intensity="0" sun_azimuth_angle="0" sun_altitude_angle="20" />
