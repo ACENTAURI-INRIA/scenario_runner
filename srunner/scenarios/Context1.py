@@ -33,12 +33,6 @@ from srunner.scenariomanager.timer import TimeOut
 from srunner.scenarios.basic_scenario import BasicScenario
 from srunner.tools.scenario_helper import get_location_in_distance_from_wp
 
-class CrossingType(Enum):
-    LEFT2RIGHT = 1
-    RIGHT2LEFT = 2
-    DIAGONALBOT2TOP = 3
-    DIAGONALTOP2BOT = 4
-
 class Context1(BasicScenario):
     """
     """
@@ -63,10 +57,10 @@ class Context1(BasicScenario):
         self._trigger_location = config.trigger_points[0].location
         self._ego_route = CarlaDataProvider.get_ego_vehicle_route()
         
-        waypointArray = {"Context1_1":[[50,170,0.6],[0,187,0.6],],
-                         "Context1_2":[[50,197,0.6],[40,197,0.6],[40,250,0.6]],
+        waypointArray = {"Context1_1":[[50,165,0.6],[50,165,0.6],[24,160,0.6]],
+                         "Context1_2":[[50,197,0.6],[40,197,0.6],[40,241,0.6],[30,241,0.6]],
                          "Context1_3":[[55,197,0.6],[40,197,0.6],[40,250,0.6]],
-                         "Context1_4":[[55,197,0.6],[100,191,0.6]]}
+                         "Context1_4":[[50,197,0.6],[189,196,0.6],[188,216,0.6],[172,216,0.6]]}
         waypoints = waypointArray[config.name]
         self.waypoint = []
         for wp in waypoints:
@@ -126,8 +120,11 @@ class Context1(BasicScenario):
         #scenario_sequence.add_child(actor_start_cross_lane)
         #scenario_sequence.add_child(actor_cross_lane)
         scenario_sequence.add_child(actor_follow_waypoint)
-        scenario_sequence.add_child(actor_stop_crossed_lane)
         #scenario_sequence.add_child(actor_remove)
+        scenario_sequence.add_child(HandBrakeVehicle(other_actor, True))            
+
+        scenario_sequence.add_child(StopVehicle(other_actor, self._other_actors_max_brake, name="{} stop".format(other_actor.id)))
+        scenario_sequence.add_child(Idle())
 
         return scenario_sequence
 
